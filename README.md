@@ -19,7 +19,14 @@ on** — tethering still starts when you enable it in Settings, and ADB keeps wo
 3. Enable **USB tethering** in Settings → Network → Hotspot & tethering.
 4. On the Mac the phone appears as an Ethernet interface and gets a DHCP lease.
 
-Uninstalling removes the preference and restores stock RNDIS behaviour.
+Uninstalling runs `uninstall.sh`, which deletes the preference, so stock RNDIS behaviour
+returns immediately.
+
+**Disabling is the awkward case.** KernelSU runs no module script for a disabled module, so
+`tether_force_usb_functions` stays at `1` while the interface reverts to `usb0`. On a firmware
+with the NCM overlay that is the one state where USB tethering matches nothing. Either
+uninstall (which cleans up), or press the module's Action button once after disabling: it
+detects the mismatch and reverts the preference to RNDIS.
 
 ## What it actually changes
 
@@ -96,9 +103,16 @@ runs after `sys.boot_completed`, long before a user can flip the tethering switc
 retries for ~10s if it loses that race. The name only takes effect when the function is
 bound, at which point the kernel expands `ncm%d` to `ncm0` via `__dev_alloc_name()`.
 
+### The Action button
+
+Tapping Action prints the preferred function, the live `ncm` interface name and the last
+boot log. It also repairs the disabled-module state described above by reverting the
+preference to RNDIS when it finds NCM selected with no `ncm*` interface. It then opens the
+tethering settings screen.
+
 ### Troubleshooting
 
-The module writes a log you can read from the KernelSU Action button or directly:
+The module writes a log, readable from the Action button or directly:
 
 ```sh
 adb shell cat /data/adb/modules/ncm-tethering-fix/ncm-tethering.log
