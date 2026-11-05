@@ -100,7 +100,7 @@ rules would only risk conflicts on kernels with a different policy layout.
 The `ifname` write must happen before tethering is enabled: `ifname_store` returns `EBUSY`
 while the function is bound into a configuration (`opts->refcnt != 0`). `boot-completed.sh`
 runs after `sys.boot_completed`, long before a user can flip the tethering switch, and
-retries for ~10s if it loses that race. The name only takes effect when the function is
+retries for about 8s if it loses that race. The name only takes effect when the function is
 bound, at which point the kernel expands `ncm%d` to `ncm0` via `__dev_alloc_name()`.
 
 ### The Action button
